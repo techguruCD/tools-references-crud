@@ -1,0 +1,6 @@
+.DS_Store
+/PySide_Widgets
+__pycache__
+/venv
+/.vscode
+database.sqlite3
