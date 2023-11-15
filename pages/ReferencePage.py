@@ -8,7 +8,8 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QPushButton,
     QSpacerItem,
-    QSizePolicy
+    QSizePolicy,
+    QMessageBox
 )
 
 import datetime
@@ -21,7 +22,7 @@ class ReferencePage(QWidget):
         super().__init__(parent)
         
         self._SN = SN
-        
+
         self.__init__UI()
 
         self._update_tool_list()
@@ -37,7 +38,7 @@ class ReferencePage(QWidget):
         self.type.addItem('video')
         self.type.addItem('datasets')
         self.url = QLineEdit(self)
-        self.summary = QLineEdit(self)
+        self.summary = QTextEdit(self)
 
         layout = QVBoxLayout()
 
@@ -46,8 +47,8 @@ class ReferencePage(QWidget):
         layout.addWidget(InputWrapper('URL', self.url))
         layout.addWidget(InputWrapper('Summary', self.summary))
 
-        layout.addItem(QSpacerItem(1, 1, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
-        layout.setStretch(4, 1)
+        # layout.addItem(QSpacerItem(1, 1, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        layout.setStretch(3, 1)
 
         self.save_button = QPushButton('Save', self)
         self.save_button.setObjectName('GreenButton')
@@ -63,9 +64,12 @@ class ReferencePage(QWidget):
             self.cancel_button.hide()
 
         control_layout = QHBoxLayout()
+        spacer = QSpacerItem(1, 1, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        control_layout.addItem(spacer)
         control_layout.addWidget(self.save_button)
         control_layout.addWidget(self.delete_button)
         control_layout.addWidget(self.cancel_button)
+        control_layout.setStretch(0, 1)
 
         layout.addLayout(control_layout)
 
@@ -82,18 +86,27 @@ class ReferencePage(QWidget):
     def _delete(self):
         if self._SN is None:
             return False
-        return ReferenceApi.delete_reference(self._SN)
+        success = ReferenceApi.delete_reference(self._SN)
+        if success:
+            QMessageBox.information(self, 'Success', "Deleted Successfully")
+        else:
+            QMessageBox.critical(self, 'Failed', "Deleting Failed")
+        return success
 
     def _save(self):
         data = {
             'name': self.name.currentText(),
             'type': self.type.currentText(),
             'url': self.url.text(),
-            'summary': self.summary.text()
+            'summary': self.summary.toPlainText()
         }    
         if self._SN != None:
             data['SN'] = self._SN
         success, reference = ReferenceApi.update_reference(data) if self._SN != None else ReferenceApi.create_reference(data)
+        if success:
+            QMessageBox.information(self, 'Success', "Saving Successfully")
+        else:
+            QMessageBox.critical(self, 'Failed', "Saving Failed")
         return success
     def __load_reference(self):
         success, reference = ReferenceApi.get_reference(self._SN)
@@ -101,4 +114,4 @@ class ReferencePage(QWidget):
             self.name.setCurrentText(reference['name'])
             self.type.setCurrentText(str(reference['type']))
             self.url.setText(str(reference['url']))
-            self.summary.setText(str(reference['summary']))
+            self.summary.setPlainText(str(reference['summary']))

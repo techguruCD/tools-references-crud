@@ -25,6 +25,7 @@ class ToolListPage(QWidget):
         super().__init__(parent)
         self.__init__UI()
         self.update_data()
+        self.tableview.resizeColumnsToContents()
 
     def __init__UI(self):
 
@@ -35,7 +36,7 @@ class ToolListPage(QWidget):
         search_button.clicked.connect(self.update_data)
 
         searchLayout = QHBoxLayout()
-        searchLayout.addWidget(InputWrapper('Search', self.name_search))
+        searchLayout.addWidget(InputWrapper('Name Search', self.name_search))
         searchLayout.addWidget(search_button)
 
         self.tableview = QTableView()

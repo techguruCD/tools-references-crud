@@ -12,7 +12,7 @@ class InputWrapper(QtWidgets.QGroupBox):
 
         self.setTitle(text)
         layout = QtWidgets.QGridLayout()
-        layout.setContentsMargins(5, 5, 5, 5)
+        layout.setContentsMargins(5, 10, 5, 5)
         layout.setSpacing(0)
         layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         layout.addWidget(widget)
