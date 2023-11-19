@@ -1,12 +1,11 @@
 from PySide6 import (
     QtCore,
-    QtGui,
-    QtWidgets
+    QtGui
 )
 from settings import colors
 tr = QtCore.QCoreApplication.translate
 
-# Name of the apartment, Phone number, First and Last name of the owner
+# Table Model to present tool data
 class ToolTableModel(QtCore.QAbstractTableModel):
     def __init__(self, data) -> None:
         super().__init__()
@@ -24,21 +23,6 @@ class ToolTableModel(QtCore.QAbstractTableModel):
             return QtCore.Qt.AlignmentFlag.AlignCenter
 
         if role == QtCore.Qt.ItemDataRole.DisplayRole:
-            # 'SN'
-            # 'category'
-            # 'platform'
-            # 'license_type'
-            # 'api_support'
-            # 'name'
-            # 'uid'
-            # 'description'
-            # 'version'
-            # 'release_date'
-            # 'lastupdated_date'
-            # 'producer'
-            # 'rating'
-            # 'downloadlink'
-            # 'editor_choice'
             match index.column():
                 case 0: # SN
                     return self._data[row]['SN']

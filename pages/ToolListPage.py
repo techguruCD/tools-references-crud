@@ -4,10 +4,7 @@ from PySide6.QtCore import (
 )
 from PySide6.QtWidgets import (
     QWidget,
-    QComboBox,
     QLineEdit,
-    QTextEdit,
-    QDateEdit,
     QPushButton,
     QTableView,
     QVBoxLayout,
@@ -18,8 +15,9 @@ from widgets.elements import InputWrapper
 from api import ToolApi
 from tablemodels import ToolTableModel
 
+# Tool List Page shows search result
 class ToolListPage(QWidget):
-    item_edit = Signal(int)
+    item_edit = Signal(int) # emitted when clicking table
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -28,7 +26,6 @@ class ToolListPage(QWidget):
         self.tableview.resizeColumnsToContents()
 
     def __init__UI(self):
-
         self.name_search = QLineEdit()
         self.name_search.setPlaceholderText('🔍')
         search_button = QPushButton('Search')
@@ -41,6 +38,15 @@ class ToolListPage(QWidget):
 
         self.tableview = QTableView()
         self.tableview.setModel(ToolTableModel([]))
+        self.tableview.hideColumn(0)
+        self.tableview.hideColumn(4)
+        self.tableview.hideColumn(6)
+        self.tableview.hideColumn(7)
+        self.tableview.hideColumn(8)
+        self.tableview.hideColumn(9)
+        self.tableview.hideColumn(12)
+        self.tableview.hideColumn(13)
+        self.tableview.hideColumn(14)
         self.tableview.doubleClicked.connect(self.table_click)
 
         layout = QVBoxLayout()

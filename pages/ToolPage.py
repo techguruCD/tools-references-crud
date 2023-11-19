@@ -5,7 +5,6 @@ from PySide6.QtWidgets import (
     QComboBox,
     QLineEdit,
     QTextEdit,
-    QDateEdit,
     QVBoxLayout,
     QHBoxLayout,
     QPushButton,
@@ -16,16 +15,18 @@ from PySide6.QtWidgets import (
 )
 
 import datetime
+import hashlib
 
 from widgets.elements import InputWrapper
-from api import ToolApi
+from api import ToolApi, ReferenceApi
+import settings
 
-
+# Tool Form page
 class ToolPage(QWidget):
     def __init__(self, parent, SN: int = None):
         super().__init__(parent)
         
-        self._SN = SN
+        self._SN = SN # None -> new form, not None -> editing form
 
         self.__init__UI()
 
@@ -33,7 +34,6 @@ class ToolPage(QWidget):
             self.__load_tool()
 
     def __init__UI(self):
-
         mainLayout = QVBoxLayout()
 
         self.release_date_calendar = QCalendarWidget()
@@ -48,30 +48,31 @@ class ToolPage(QWidget):
         self.lastupdated_date_calendar.setWindowFlags(QtCore.Qt.Popup)
 
         self.category = QComboBox(self)
+        for category in settings.tool_categories:
+            self.category.addItem(category)
         self.platform = QComboBox(self)
-        self.platform.addItem('1')
-        self.platform.addItem('2')
-        self.platform.addItem('3')
-        self.platform.addItem('4')
+        for platform in settings.tool_platforms:
+            self.platform.addItem(platform)
         layout = QHBoxLayout()
         layout.addWidget(InputWrapper('Category', self.category))
         layout.addWidget(InputWrapper('Platform', self.platform))
         mainLayout.addLayout(layout)
 
         self.license_type = QComboBox(self)
-        self.license_type.addItem('1')
-        self.license_type.addItem('2')
-        self.license_type.addItem('3')
+        for license_type in settings.tool_license_types:
+            self.license_type.addItem(license_type)
         self.api_support = QComboBox(self)
-        self.api_support.addItem('0')
-        self.api_support.addItem('1')
+        for api_support in settings.tool_api_supports:
+            self.api_support.addItem(api_support)
         layout = QHBoxLayout()
         layout.addWidget(InputWrapper('License Type', self.license_type))
         layout.addWidget(InputWrapper('Api Support', self.api_support))
         mainLayout.addLayout(layout)
 
         self.name = QLineEdit(self)
+        self.name.textEdited.connect(self.name_edited)
         self.uid = QLineEdit(self)
+        self.uid.setReadOnly(True)
         layout = QHBoxLayout()
         layout.addWidget(InputWrapper('Name', self.name))
         layout.addWidget(InputWrapper('UID', self.uid))
@@ -81,9 +82,9 @@ class ToolPage(QWidget):
         mainLayout.addWidget(InputWrapper('Description', self.description))
 
         self.version = QLineEdit(self)
-        self.release_date_button = QPushButton('2000-01-01', self)
+        self.release_date_button = QPushButton(QDate.currentDate().toString('yyyy-MM-dd'), self)
         self.release_date_button.clicked.connect(self.release_date_button_click)
-        self.lastupdated_date_button = QPushButton('2000-01-01', self)
+        self.lastupdated_date_button = QPushButton(QDate.currentDate().toString('yyyy-MM-dd'), self)
         self.lastupdated_date_button.clicked.connect(self.lastupdated_date_button_click)
         layout = QHBoxLayout()
         layout.addWidget(InputWrapper('Version', self.version))
@@ -98,19 +99,11 @@ class ToolPage(QWidget):
 
         self.producer = QLineEdit(self)
         self.rating = QComboBox(self)
-        self.rating.addItem('1')
-        self.rating.addItem('2')
-        self.rating.addItem('3')
-        self.rating.addItem('4')
-        self.rating.addItem('5')
-        self.rating.addItem('6')
-        self.rating.addItem('7')
-        self.rating.addItem('8')
-        self.rating.addItem('9')
-        self.rating.addItem('10')
+        for rating in settings.tool_ratings:
+            self.rating.addItem(rating)
         self.editor_choice = QComboBox(self)
-        self.editor_choice.addItem('0')
-        self.editor_choice.addItem('1')
+        for editor_choice in settings.tool_editor_choices:
+            self.editor_choice.addItem(editor_choice)
         layout = QHBoxLayout()
         layout.addWidget(InputWrapper('Producer', self.producer))
         wrapper = InputWrapper('Rating', self.rating)
@@ -123,9 +116,6 @@ class ToolPage(QWidget):
 
         self.downloadlink = QLineEdit(self)
         mainLayout.addWidget(InputWrapper('Download Link', self.downloadlink))
-
-        # mainLayout.addItem(QSpacerItem(
-        #     1, 1, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
         self.save_button = QPushButton('Save', self)
         self.save_button.setObjectName('GreenButton')
@@ -173,6 +163,30 @@ class ToolPage(QWidget):
         self.lastupdated_date_button.setText(date.toString('yyyy-MM-dd'))
         self.lastupdated_date_calendar.close()
 
+    def name_edited(self, text):
+        if text == '':
+            self.uid.setText('')
+        else:
+            md5_hash = hashlib.md5()
+            md5_hash.update(text.encode('utf-8'))
+            self.uid.setText(md5_hash.hexdigest())
+
+    def clear_fields(self):
+        self.category.setCurrentIndex(0)
+        self.platform.setCurrentIndex(0)
+        self.license_type.setCurrentIndex(0)
+        self.api_support.setCurrentIndex(0)
+        self.name.setText('')
+        self.name.textEdited.emit('')
+        self.description.setText('')
+        self.version.setText('')
+        self.release_date_button.setText(QDate.currentDate().toString('yyyy-MM-dd'))
+        self.lastupdated_date_button.setText(QDate.currentDate().toString('yyyy-MM-dd'))
+        self.producer.setText('')
+        self.rating.setCurrentIndex(0)
+        self.editor_choice.setCurrentIndex(0)
+        self.downloadlink.setText('')
+
     def _delete(self):
         if self._SN is None:
             return False
@@ -186,9 +200,9 @@ class ToolPage(QWidget):
     def _save(self):
         data = {
             'category': self.category.currentText(),
-            'platform': int(self.platform.currentText()),
-            'license_type': int(self.license_type.currentText()),
-            'api_support': int(self.api_support.currentText()),
+            'platform': self.platform.currentText(),
+            'license_type': self.license_type.currentText(),
+            'api_support': self.api_support.currentText(),
             'name': self.name.text(),
             'uid': self.uid.text(),
             'description': self.description.toPlainText(),
@@ -196,10 +210,38 @@ class ToolPage(QWidget):
             'release_date': self.release_date_button.text(),
             'lastupdated_date': self.lastupdated_date_button.text(),
             'producer': self.producer.text(),
-            'rating': int(self.rating.currentText()),
+            'rating': self.rating.currentText(),
             'downloadlink': self.downloadlink.text(),
-            'editor_choice': int(self.editor_choice.currentText()),
+            'editor_choice': self.editor_choice.currentText(),
         }
+
+        if (data['category'] == '' or
+            data['platform'] == '' or
+            data['license_type'] == '' or
+            data['api_support'] == '' or
+            data['name'] == '' or 
+            data['description'] == '' or 
+            data['version'] == '' or 
+            data['producer'] == '' or 
+            data['downloadlink'] == ''):
+            QMessageBox.warning(self, 'Warning', 'Please check inputs')
+            return
+        
+        duplicate = ToolApi.check_duplicate(data['name'], self._SN)
+        if duplicate:
+            QMessageBox.warning(self, 'Warning', 'Duplicated name')
+            return
+        data['platform'] = int(self.platform.currentText())
+        data['license_type'] = int(self.license_type.currentText())
+        data['api_support'] = int(self.api_support.currentText())
+        if data['rating'] != '':
+            data['rating'] = int(self.rating.currentText())
+        else:
+            data['rating'] = None
+        if data['editor_choice'] != '':
+            data['editor_choice'] = int(self.editor_choice.currentText())
+        else:
+            data['editor_choice'] = None
 
         if self._SN != None:
             data['SN'] = self._SN
@@ -207,6 +249,7 @@ class ToolPage(QWidget):
             data) if self._SN != None else ToolApi.create_tool(data)
         if success:
             QMessageBox.information(self, 'Success', "Saved Successfully")
+            self.clear_fields()
         else:
             QMessageBox.critical(self, 'Failed', "Saving Failed")
         return success
@@ -229,3 +272,6 @@ class ToolPage(QWidget):
             self.rating.setCurrentText(str(tool['rating']))
             self.downloadlink.setText(tool['downloadlink'])
             self.editor_choice.setCurrentText(str(tool['editor_choice']))
+
+            if ReferenceApi.check_duplicate(tool['name']):
+                self.delete_button.hide()

@@ -12,13 +12,34 @@ colors = {
     'red_normal': '#dc3545'
 }
 
-email_subjects = [
-    'subject_1',
-    'subject_2',
-    'subject_3',
-    'subject_4',
-    'subject_5',
+reference_types = [
+    '',
+    'tutorials',
+    'blogs',
+    'video',
+    'datasets'
 ]
 
-PAGINATION_PAGE_SIZE = 100
+tool_categories = [
+    '',
+    'text1',
+    'text2',
+    'text3',
+    'text4',
+    'text5'
+]
+
+tool_platforms = [
+    '',
+    '1', 
+    '2',
+    '3',
+    '4'
+]
+
+tool_license_types = ['', '1', '2', '3']
+tool_api_supports = ['', '0', '1']
+tool_ratings = ['', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+tool_editor_choices = ['', '0', '1']
+
 SEARCH_DELIMETER = ','

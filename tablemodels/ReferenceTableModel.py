@@ -1,12 +1,11 @@
 from PySide6 import (
     QtCore,
-    QtGui,
-    QtWidgets
+    QtGui
 )
 from settings import colors
 tr = QtCore.QCoreApplication.translate
 
-# (Tenant status (active, inactive), Phone, First and last name)
+# Table Model to present reference data
 class ReferenceTableModel(QtCore.QAbstractTableModel):
     def __init__(self, data) -> None:
         super().__init__()

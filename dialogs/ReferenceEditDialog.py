@@ -3,12 +3,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout
 )
 
-import datetime
-
-from widgets.elements import InputWrapper
-from api import ToolApi
 from pages import ReferencePage
 
+# Dialog class that shows Reference Form page for editing
 class ReferenceEditDialog(QDialog):
     def __init__(self, parent, SN):
         super().__init__(parent)

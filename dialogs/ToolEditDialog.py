@@ -3,12 +3,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout
 )
 
-import datetime
-
-from widgets.elements import InputWrapper
-from api import ToolApi
 from pages import ToolPage
 
+# Dialog class to show tool editing form
 class ToolEditDialog(QDialog):
     def __init__(self, parent, SN):
         super().__init__(parent)

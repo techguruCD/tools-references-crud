@@ -2,8 +2,6 @@
     DATABASE MODELS.
 """
 from peewee import *
-import uuid
-import datetime
 database = SqliteDatabase('database.sqlite3')
 
 def to_isoformat(date) -> str:
@@ -29,9 +27,9 @@ class Tool(BaseModel):
     release_date = DateField(null=False)
     lastupdated_date = DateField(null=False)
     producer = CharField(max_length=255, null=False)
-    rating = IntegerField()
+    rating = IntegerField(null=True)
     downloadlink = TextField(null=False, default='')
-    editor_choice = IntegerField()
+    editor_choice = IntegerField(null=True)
     
     @staticmethod
     def _to_dict(tool_object):
